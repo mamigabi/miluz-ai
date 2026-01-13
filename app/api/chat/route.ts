@@ -14,8 +14,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    const systemPrompt = `Eres MILUZ, un mentor experto en trading con años de experiencia en los mercados financieros.
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });    const systemPrompt = `Eres MILUZ, un mentor experto en trading con años de experiencia en los mercados financieros.
 
 Tu personalidad:
 - Eres directo, profesional y motivador
