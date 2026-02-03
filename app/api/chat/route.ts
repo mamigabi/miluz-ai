@@ -4,8 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key'
 );
 
 // IDENTITY: MILUZ Trading Mentor (Blacksheep Philosophy)
@@ -94,7 +94,7 @@ async function executeTool(toolName: string, toolInput: Record<string, unknown>)
     case 'searchTrendingTopics':
       return {
         trending: [
-          'Altseason incoming', 
+          'Altseason incoming',
           'Bitcoin breakout imminent',
           'ETF inflows recovering'
         ],
@@ -124,7 +124,7 @@ export async function POST(req: Request) {
         .select('*')
         .eq('user_id', userId)
         .limit(10);
-      
+
       // Append previous context to system prompt
       console.log('Agent memory loaded:', memory?.length || 0);
     }
@@ -132,8 +132,8 @@ export async function POST(req: Request) {
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.0-flash-exp',
       systemInstruction: SYSTEM_PROMPT,
-      tools: tools as any
-    });
+      tools: [tools] as any
+    } as any);
 
     const chat = model.startChat({
       history: messages.slice(0, -1).map((m: any) => ({
@@ -144,16 +144,16 @@ export async function POST(req: Request) {
 
     // Send user message and let the model decide if it needs tools
     const result = await chat.sendMessage(messages[messages.length - 1].content);
-    
+
     // Process any tool calls
     const response = result.response;
     let finalResponse = response.text();
 
     // Check if model called any tools
-    if (response.functionCalls()) {
-      const calls = response.functionCalls();
+    if ((response as any).functionCalls()) {
+      const calls = (response as any).functionCalls();
       let toolResults = [];
-      
+
       for (const call of calls) {
         const toolResult = await executeTool(call.name, call.args);
         toolResults.push({
